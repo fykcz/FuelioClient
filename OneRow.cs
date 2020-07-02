@@ -12,8 +12,12 @@ namespace FYK.Utils.FuelioClient
     internal class OneRow
     {
         //protected string _dataRow;
-        protected static Dictionary<string, PropertyMap> _properties;
-        public static List<PropertyMap> Columns;
+        protected Dictionary<string, PropertyMap> _properties;
+        protected List<PropertyMap> _columns;
+        protected static string _importCSVDateFormat = "yyyy-MM-dd";
+
+        public List<PropertyMap> Columns { get { return _columns; } private set { } }
+        public Dictionary<string, PropertyMap> Properties { get { return _properties; } private set { } }
 
         public OneRow()
         {
@@ -33,14 +37,20 @@ namespace FYK.Utils.FuelioClient
             }
         }
 
-        public static void LoadColumns(string row)
+        public OneRow(Dictionary<string, PropertyMap> properties, List<PropertyMap> columns)
         {
-            Columns = new List<PropertyMap>();
+            _properties = properties;
+            _columns = columns;
+        }
+
+        public void LoadColumns(string row)
+        {
+            _columns = new List<PropertyMap>();
             var cols = GetParts(row);
             foreach (var c in cols)
             {
                 if (_properties.ContainsKey(c))
-                    Columns.Add(_properties[c]);
+                    _columns.Add(_properties[c]);
                 else
                     throw new InvalidDataException($"Property for column '{c}' not found");
             }
@@ -49,7 +59,7 @@ namespace FYK.Utils.FuelioClient
         {
             DateTime dt;
             CultureInfo ci = CultureInfo.InvariantCulture;
-            if (DateTime.TryParseExact(part, "yyyy-MM-dd HH:mm", ci, DateTimeStyles.None, out dt))
+            if (DateTime.TryParseExact(part, $"{_importCSVDateFormat} HH:mm", ci, DateTimeStyles.None, out dt))
             {
                 return dt;
             }
@@ -92,7 +102,7 @@ namespace FYK.Utils.FuelioClient
             var parts = GetParts(row);
             for (var i = 0; i < parts.Length; i++)
             {
-                var pm = Columns[i];
+                var pm = _columns[i];
                 switch (pm.DataType)
                 {
                     case "Decimal":
@@ -118,13 +128,16 @@ namespace FYK.Utils.FuelioClient
 
         public string GetColumnValue(string columnName)
         {
-
             if (!_properties.ContainsKey(columnName))
                 throw new InvalidDataException($"Unknown column '{columnName}'");
             var pm = _properties[columnName];
             return pm.PropertyInfo.GetValue(this).ToString();
         }
 
+        public virtual OneRow GetInstance()
+        {
+            throw new NotImplementedException("GetInstance must be overriden in the child");
+        }
         internal class PropertyMap
         {
             public string ColumnName { get; private set; }

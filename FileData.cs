@@ -12,6 +12,7 @@ namespace FYK.Utils.FuelioClient
         private const string Vehicle = "Vehicle";
         private const string Log = "Log";
         private const string FavStations = "FavStations";
+
         public Dictionary<string, List<OneRow>> DataSets;
 
         public void LoadFile(string fileName)
@@ -21,6 +22,7 @@ namespace FYK.Utils.FuelioClient
             var rx = new Regex("^\"## (.*)\"", RegexOptions.IgnoreCase);
             string line;
             var datasetName = "";
+            OneRow columnsHolder = null;
 
             while ((line = file.ReadLine()) != null)
             {
@@ -33,40 +35,28 @@ namespace FYK.Utils.FuelioClient
                     switch (datasetName)
                     {
                         case Vehicle:
-                            new VehicleItem();
-                            VehicleItem.LoadColumns(cols);
+                            columnsHolder = new VehicleItem();
                             break;
                         case Log:
-                            new LogItem();
-                            LogItem.LoadColumns(cols);
+                            columnsHolder = new LogItem();
                             break;
                         case FavStations:
-                            new StationItem();
-                            StationItem.LoadColumns(cols);
+                            columnsHolder = new StationItem();
                             break;
                         default:
                             datasetName = "";
-                            break;
+                            columnsHolder = null;
+                            continue;
                     }
+                    columnsHolder.LoadColumns(cols);
                     continue;
                 }
-                OneRow r;
-                switch (datasetName)
+                if (columnsHolder != null)
                 {
-                    case Vehicle:
-                        r = new VehicleItem();
-                        break;
-                    case Log:
-                        r = new LogItem();
-                        break;
-                    case FavStations:
-                        r = new StationItem();
-                        break;
-                    default:
-                        continue;
+                    OneRow r = columnsHolder.GetInstance();
+                    r.ParseRow(line);
+                    DataSets[datasetName].Add(r);
                 }
-                r.ParseRow(line);
-                DataSets[datasetName].Add(r);
             }
             file.Close();
         }

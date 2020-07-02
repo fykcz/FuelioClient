@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 
@@ -59,5 +60,13 @@ namespace FYK.Utils.FuelioClient
 
         [Description("TankCalc")]
         public decimal TankCalc { get; set; }
+
+        public LogItem() : base() { }
+        public LogItem(Dictionary<string, PropertyMap> properties, List<PropertyMap> columns) : base(properties, columns) { }
+
+        public override OneRow GetInstance()
+        {
+            return new LogItem(_properties, _columns);
+        }
     }
 }

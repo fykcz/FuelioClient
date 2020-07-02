@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace FYK.Utils.FuelioClient
 {
@@ -16,5 +17,13 @@ namespace FYK.Utils.FuelioClient
         public string Description { get; set; }
         [Description("CountryCode")]
         public string CountryCode { get; set; }
+
+        public StationItem() : base() { }
+        public StationItem(Dictionary<string, PropertyMap> properties, List<PropertyMap> columns) : base(properties, columns) { }
+        public override OneRow GetInstance()
+        {
+            return new StationItem(_properties, _columns);
+        }
+
     }
 }

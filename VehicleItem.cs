@@ -1,9 +1,12 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace FYK.Utils.FuelioClient
 {
     internal class VehicleItem : OneRow
     {
+        private string _icsv;
+
         [Description("Name")]
         public string Name { get; set; }
 
@@ -20,7 +23,7 @@ namespace FYK.Utils.FuelioClient
         public int ConsumptionUnit { get; set; }
 
         [Description("ImportCSVDateFormat")]
-        public string ImportCSVDateFormat { get; set; }
+        public string ImportCSVDateFormat { get { return _icsv; } set { _icsv = _importCSVDateFormat = value; } }
 
         [Description("VIN")]
         public string VIN { get; set; }
@@ -63,5 +66,13 @@ namespace FYK.Utils.FuelioClient
 
         [Description("FuelConsumptionTank2")]
         public int FuelConsumptionTank2 { get; set; }
+
+        public VehicleItem() : base() { }
+        public VehicleItem(Dictionary<string, PropertyMap> properties, List<PropertyMap> columns) : base(properties, columns) { }
+        public override OneRow GetInstance()
+        {
+            return new VehicleItem(_properties, _columns);
+        }
+
     }
 }
