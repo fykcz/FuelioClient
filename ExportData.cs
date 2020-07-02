@@ -138,6 +138,14 @@ namespace FYK.Utils.FuelioClient
             using (var sw = new StreamWriter(outputFileTextBox.Text, false, Encoding.Unicode))
             {
                 var sb = new StringBuilder();
+                foreach (var c in selectedListBox.Items)
+                {
+                    var colName = c.ToString();
+                    sb.Append(colName);
+                    if (colName != selectedListBox.Items[selectedListBox.Items.Count - 1].ToString())
+                        sb.Append('\t');
+                }
+                sw.WriteLine(sb.ToString());
                 foreach (var d in _data)
                 {
                     sb.Clear();
