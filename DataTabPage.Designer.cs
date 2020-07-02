@@ -76,6 +76,7 @@
             this.columnColumnHeader,
             this.valueColumnHeader});
             this.detailListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.detailListView.FullRowSelect = true;
             this.detailListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.detailListView.HideSelection = false;
             this.detailListView.Location = new System.Drawing.Point(0, 0);

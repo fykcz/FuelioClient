@@ -12,6 +12,9 @@ namespace FYK.Utils.FuelioClient
 {
     public partial class MainForm : Form
     {
+        private FileData _actualFileData = null;
+        private string _actualFileName = "";
+
         public MainForm()
         {
             InitializeComponent();
@@ -30,6 +33,28 @@ namespace FYK.Utils.FuelioClient
         {
             Application.Exit();
         }
+        private void LoadData()
+        {
+            Cursor = Cursors.WaitCursor;
+            _actualFileData = new FileData();
+            _actualFileData.LoadFile(_actualFileName);
+            tabControl.TabPages.Clear();
+            foreach (var c in _actualFileData.DataSets.Keys)
+            {
+                if (_actualFileData.DataSets[c].Count > 0)
+                {
+                    var tp = new DataTabPage();
+                    tp.LoadData(_actualFileData.DataSets[c]);
+                    tp.Text = c;
+                    tabControl.TabPages.Add(tp);
+                }
+
+            }
+            //tabControl.SelectedIndex = 0;
+            if (tabControl.TabPages.Count > 0)
+                exportDataToolStripMenuItem.Enabled = _actualFileData.DataSets[tabControl.TabPages[0].Text].Count > 0;
+            Cursor = Cursors.Default;
+        }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -42,25 +67,29 @@ namespace FYK.Utils.FuelioClient
                 fn.CheckFileExists = true;
 
                 if (fn.ShowDialog() != DialogResult.OK) return;
-                fileNameToolStripStatusLabel.Text = fn.FileName;
-
-                Cursor = Cursors.WaitCursor;
-                var fd = new FileData();
-                fd.LoadFile(fn.FileName);
-                tabControl.TabPages.Clear();
-                foreach (var c in fd.DataSets.Keys)
-                {
-                    if (fd.DataSets[c].Count > 0)
-                    {
-                        var tp = new DataTabPage();
-                        tp.LoadData(fd.DataSets[c]);
-                        tp.Text = c;
-                        tabControl.TabPages.Add(tp);
-                    }
-                        
-                }
-                Cursor = Cursors.Default;
+                _actualFileName = fileNameToolStripStatusLabel.Text = fn.FileName;
             }
+            LoadData();
+        }
+
+        private void exportDataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var ed = new ExportData())
+            {
+                ed.LoadData(_actualFileData.DataSets[tabControl.SelectedTab.Text]);
+                ed.ShowDialog();
+            }
+        }
+
+        private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedTab == null)
+            {
+                exportDataToolStripMenuItem.Enabled = false;
+                return;
+            }
+             
+            exportDataToolStripMenuItem.Enabled = _actualFileData.DataSets[tabControl.SelectedTab.Text].Count > 0;
         }
     }
 }
