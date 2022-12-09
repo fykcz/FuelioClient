@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace FYK.Utils.FuelioClient
 {
@@ -17,8 +16,38 @@ namespace FYK.Utils.FuelioClient
 
         public void LoadFile(string fileName)
         {
+            StreamReader file = null;
+
+            if (Path.GetExtension(fileName) == ".zip")
+            {
+                using (FileStream zipFile = File.OpenRead(fileName))
+                {
+                    using (var zipArchive = new ZipArchive(zipFile, ZipArchiveMode.Read))
+                    {
+                        var entryName = Path.GetFileNameWithoutExtension(fileName);
+                        var haveEntry = false;
+                        foreach (var z in zipArchive.Entries)
+                        {
+                            if (z.Name == entryName)
+                            {
+                                haveEntry = true;
+                                break;
+                            }
+                        }
+                        if (!haveEntry) return;
+                        var zipEntry = zipArchive.GetEntry(entryName);
+                        //var sr = new StreamReader(zipEntry.Open());
+                        var txt = (new StreamReader(zipEntry.Open())).ReadToEnd();
+                        byte[] byteArray = Encoding.ASCII.GetBytes(txt);
+                        file = new StreamReader(new MemoryStream(byteArray));
+                    }
+                }
+            }
+            else
+                file = new StreamReader(fileName);
+
             DataSets = new Dictionary<string, List<OneRow>>();
-            var file = new System.IO.StreamReader(fileName);
+            //var file = new System.IO.StreamReader(fileName);
             var rx = new Regex("^\"## (.*)\"", RegexOptions.IgnoreCase);
             string line;
             var datasetName = "";
@@ -30,7 +59,7 @@ namespace FYK.Utils.FuelioClient
                 if (m.Success)
                 {
                     datasetName = m.Groups[1].Value;
-                    DataSets.Add(datasetName,  new List<OneRow>());
+                    DataSets.Add(datasetName, new List<OneRow>());
                     var cols = file.ReadLine();
                     switch (datasetName)
                     {

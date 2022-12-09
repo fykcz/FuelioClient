@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace FYK.Utils.FuelioClient
@@ -60,9 +53,20 @@ namespace FYK.Utils.FuelioClient
         {
             using (var fn = new OpenFileDialog())
             {
-                fn.Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*";
+                fn.Filter = "CSV files (*.csv)|*.csv*|All files (*.*)|*.*";
                 fn.FilterIndex = 1;
-                fn.InitialDirectory = Environment.GetEnvironmentVariable("USERPROFILE") + @"\Disk Google\Android\Fuelio\sync";
+                var initialDirectory = "";
+
+                foreach (var d in System.IO.DriveInfo.GetDrives())
+                {
+                    if (d.VolumeLabel != null && d.VolumeLabel == "Google Drive")
+                    {
+                        initialDirectory = System.IO.Path.Combine(d.Name, "Můj disk", @"Android\Fuelio\sync");
+                        break;
+                    }
+                }
+
+                fn.InitialDirectory = initialDirectory;
                 fn.RestoreDirectory = true;
                 fn.CheckFileExists = true;
 
@@ -88,7 +92,7 @@ namespace FYK.Utils.FuelioClient
                 exportDataToolStripMenuItem.Enabled = false;
                 return;
             }
-             
+
             exportDataToolStripMenuItem.Enabled = _actualFileData.DataSets[tabControl.SelectedTab.Text].Count > 0;
         }
     }
