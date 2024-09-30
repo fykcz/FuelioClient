@@ -38,7 +38,7 @@ namespace FYK.Utils.FuelioClient
                         var zipEntry = zipArchive.GetEntry(entryName);
                         //var sr = new StreamReader(zipEntry.Open());
                         var txt = (new StreamReader(zipEntry.Open())).ReadToEnd();
-                        byte[] byteArray = Encoding.ASCII.GetBytes(txt);
+                        byte[] byteArray = Encoding.UTF8.GetBytes(txt);
                         file = new StreamReader(new MemoryStream(byteArray));
                     }
                 }
