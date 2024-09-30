@@ -61,6 +61,9 @@ namespace FYK.Utils.FuelioClient
         [Description("TankCalc")]
         public decimal TankCalc { get; set; }
 
+        [Description("Weather")]
+        public string Weather { get; set; }
+
         public LogItem() : base() { }
         public LogItem(Dictionary<string, PropertyMap> properties, List<PropertyMap> columns) : base(properties, columns) { }
 
