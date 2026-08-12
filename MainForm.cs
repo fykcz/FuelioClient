@@ -59,11 +59,14 @@ namespace FYK.Utils.FuelioClient
 
                 foreach (var d in System.IO.DriveInfo.GetDrives())
                 {
-                    if (d.VolumeLabel != null && d.VolumeLabel == "Google Drive")
+                    try
                     {
-                        initialDirectory = System.IO.Path.Combine(d.Name, "Můj disk", @"Android\Fuelio\sync");
-                        break;
-                    }
+                        if (d.VolumeLabel != null && d.VolumeLabel == "Google Drive")
+                        {
+                            initialDirectory = System.IO.Path.Combine(d.Name, "Můj disk", @"Android\Fuelio\sync");
+                            break;
+                        }
+                    } catch { }
                 }
 
                 fn.InitialDirectory = initialDirectory;
